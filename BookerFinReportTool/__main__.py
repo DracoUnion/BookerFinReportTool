@@ -3,8 +3,10 @@ import argparse
 from . import __version__
 from .util import *
 from .openai import set_openai_props, call_llm_with_toolcall_retry
-from .fin_report import FinReportOrchestrator
 from . import download, fetch, batch
+from . import ingest, extract, index, wiki, backtest, leaderboard
+from . import consensus, narrative, debate, catalyst, counterfactual
+from . import quality, factor, config, doctor
 
 def main():
     openai_key = os.environ.get('OPENAI_API_KEY')
@@ -43,6 +45,25 @@ def main():
     download.reg_subparser(subparsers)
     fetch.reg_subparser(subparsers)
     batch.reg_subparser(subparsers)
+
+    # 公共流水线
+    ingest.reg_subparser(subparsers)
+    extract.reg_subparser(subparsers)
+    index.reg_subparser(subparsers)
+    config.reg_subparser(subparsers)
+    doctor.reg_subparser(subparsers)
+
+    # 十个功能子命令
+    backtest.reg_subparser(subparsers)
+    leaderboard.reg_subparser(subparsers)
+    consensus.reg_subparser(subparsers)
+    narrative.reg_subparser(subparsers)
+    debate.reg_subparser(subparsers)
+    wiki.reg_subparser(subparsers)
+    catalyst.reg_subparser(subparsers)
+    counterfactual.reg_subparser(subparsers)
+    quality.reg_subparser(subparsers)
+    factor.reg_subparser(subparsers)
 
     args = parser.parse_args()
     set_openai_props(args)
