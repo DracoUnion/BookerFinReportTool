@@ -54,12 +54,18 @@ class DjYanbaoClient:
         self, page: int = 1, limit: int = 20,
         q: str = "", sort: str = "publish_at",
         order: str = "DESC",
+        publish_at_begin: str = "",
+        publish_at_end: str = "",
         **filters,
     ) -> List[dict]:
         """研报列表 / 搜索。"""
         params = {"page": page, "limit": limit, "sort": sort, "order": order}
         if q:
             params["q"] = q
+        if publish_at_begin:
+            params["publishAtBegin"] = publish_at_begin
+        if publish_at_end:
+            params["publishAtEnd"] = publish_at_end
         params.update({k: v for k, v in filters.items() if v is not None})
         data = self._req("GET", "report", params=params)
         return data.get("data", []) if isinstance(data, dict) else (data or [])

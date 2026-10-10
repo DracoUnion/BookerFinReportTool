@@ -27,6 +27,8 @@ def fetch(args):
                 page=page,
                 limit=args.limit,
                 q=args.query,
+                publish_at_begin=args.begin,
+                publish_at_end=args.end,
             )
             if not items:
                 break
@@ -58,4 +60,6 @@ def reg_subparser(subparsers):
     fetch_parser.add_argument("-q", "--query", default='', help="研报搜索词（仅 source=list）")
     fetch_parser.add_argument("-l", "--limit", type=int, default=20, help="每页条数（仅 source=list）")
     fetch_parser.add_argument("-p", "--pages", type=int, default=0, help="最大抓取页数，0 表示不限（仅 source=list）")
+    fetch_parser.add_argument("-b", "--begin", default='', help="起始日期 YYYY-MM-DD（仅 source=list）")
+    fetch_parser.add_argument("-e", "--end", default='', help="截止日期 YYYY-MM-DD（仅 source=list）")
     fetch_parser.set_defaults(func=fetch)
