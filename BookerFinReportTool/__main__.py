@@ -4,6 +4,7 @@ from . import __version__
 from .util import *
 from .openai import set_openai_props, call_llm_with_toolcall_retry
 from .fin_report import FinReportOrchestrator
+from . import download, fetch, batch
 
 def main():
     openai_key = os.environ.get('OPENAI_API_KEY')
@@ -11,6 +12,7 @@ def main():
     openai_model = os.environ.get('OPENAI_CHAT_MODEL', 'gpt-3.5-turbo')
     openai_vmodel = os.environ.get('OPENAI_VIS_MODEL', '')
     openai_tti_model = os.environ.get('OPENAI_TTI_MODEL', '')
+    dj_key = os.environ.get('DJ_YANBAO_KEY', '')
 
     parser = argparse.ArgumentParser(prog="BookerFinReportTool", formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-v", "--version", action="version", version=f"BookerFinReportTool version: {__version__}")
@@ -33,12 +35,18 @@ def main():
     parser.add_argument("-rt", "--read-timeout", type=int, default=120, help="读取超时秒数")
     parser.add_argument("-rr", "--repetition-regex", default='', help="重复检测正则")
     parser.add_argument("-nt", "--no-think", action='store_true', help="关闭思考模式")
+    parser.add_argument("-dj", "--dj-key", default=dj_key, help="洞见研报 Bearer Key")
 
-    parser.add_argument("fname", help="PDF 文件名或包含 PDF/MD 文件的目录")
+    parser.set_defaults(func=lambda x: parser.print_help())
+    subparsers = parser.add_subparsers()
+
+    download.reg_subparser(subparsers)
+    fetch.reg_subparser(subparsers)
+    batch.reg_subparser(subparsers)
 
     args = parser.parse_args()
     set_openai_props(args)
-    FinReportOrchestrator(args).run()
+    args.func(args)
 
 if __name__ == '__main__':
     main()
