@@ -25,8 +25,12 @@ def _publish_date_str(detail) -> str:
     except Exception:
         return str(d)[:10]
 
+def _safe_name(text: str) -> str:
+    """过滤路径非法字符，保留中文标点。"""
+    return re.sub(r'[\\/:*?"<>\\|]', '', text) if text else ''
+
 def download(args, report_id=None):
-    """下载单份研报 PDF，保存到 args.out_dir 目录，文件名为 `【日期】标题.pdf`。"""
+    """下载单份研报 PDF，文件名格式 `【日期】【机构】标题.pdf`。"""
     if not args.dj_key:
         logger.fatal('请通过 -dj 或 DJ_YANBAO_KEY 提供洞见研报 Bearer Key')
         return
@@ -45,11 +49,23 @@ def download(args, report_id=None):
         detail = client.report_detail(rid) or {}
     except Exception:
         detail = {}
-    title = detail.get('title', '')
-    safe_title = re.sub(r'[\\/:*?"<>\\|]', '', title) if title else ''
+
+    title = _safe_name(detail.get('title', ''))
+    # 机构名：优先 detail.institution，其次 cards/organization 字段
+    institution = (
+        detail.get('institution')
+        or detail.get('organization')
+        or (detail.get('cards') or {}).get('institution', '')
+        or ''
+    )
+    institution = _safe_name(str(institution))
+
     date_str = _publish_date_str(detail)
-    base = f'【{date_str}】{safe_title}' if safe_title else f'【{date_str}】{rid}'
-    fname = path.join(out_dir, base + '.pdf')
+    parts = [f'【{date_str}】']
+    if institution:
+        parts.append(f'【{institution}】')
+    parts.append(title if title else str(rid))
+    fname = path.join(out_dir, ''.join(parts) + '.pdf')
 
     r = requests.get(file_url)
     r.raise_for_status()
