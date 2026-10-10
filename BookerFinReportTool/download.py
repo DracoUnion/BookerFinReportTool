@@ -1,6 +1,7 @@
 """子命令 download：下载单份研报。"""
 import re
 import logging
+from datetime import datetime
 from os import path
 import requests
 from .fin_report_api import DjYanbaoClient
@@ -11,8 +12,21 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def _publish_date_str(detail) -> str:
+    """从研报详情中提取发布日期，格式化为 `YYYY-MM-DD`；缺省返回空串。"""
+    if not detail:
+        return ''
+    d = detail.get('publishAt') or detail.get('publish_at') or detail.get('publishDate') or ''
+    if isinstance(d, str):
+        m = re.match(r'\d{4}-\d{2}-\d{2}', d)
+        return m.group(0) if m else d[:10]
+    try:
+        return datetime.fromtimestamp(d).strftime('%Y-%m-%d')
+    except Exception:
+        return str(d)[:10]
+
 def download(args, report_id=None):
-    """下载单份研报 PDF，保存到 args.out_dir 目录。"""
+    """下载单份研报 PDF，保存到 args.out_dir 目录，文件名为 `【日期】标题.pdf`。"""
     if not args.dj_key:
         logger.fatal('请通过 -dj 或 DJ_YANBAO_KEY 提供洞见研报 Bearer Key')
         return
@@ -28,12 +42,14 @@ def download(args, report_id=None):
     logger.info(f'PDF 下载地址：{file_url}')
 
     try:
-        detail = client.report_detail(rid)
-        title = (detail or {}).get('title', '')
+        detail = client.report_detail(rid) or {}
     except Exception:
-        title = ''
-    safe_title = re.sub(r'[^\\w\\u4e00-\\u9fff]', '_', title) if title else ''
-    fname = path.join(out_dir, f'{rid}_{safe_title}.pdf' if safe_title else f'{rid}.pdf')
+        detail = {}
+    title = detail.get('title', '')
+    safe_title = re.sub(r'[^\\w\\u4e00-\\u9fff]', '', title) if title else ''
+    date_str = _publish_date_str(detail)
+    base = f'【{date_str}】{safe_title}' if safe_title else f'【{date_str}】{rid}'
+    fname = path.join(out_dir, base + '.pdf')
 
     r = requests.get(file_url)
     r.raise_for_status()
