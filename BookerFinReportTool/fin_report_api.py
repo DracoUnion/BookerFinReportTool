@@ -1,6 +1,6 @@
 """洞见研报 API 客户端（Bearer 鉴权）。
 
-key 从命令行参数 `args` 获取（`args.djkey`）。
+key 从命令行参数 `args` 获取（`args.dj_key`）。
 """
 import json
 import requests
@@ -16,7 +16,7 @@ class DjYanbaoClient:
 
     用法::
 
-        client = DjYanbaoClient(args)   # args.djkey 为 Bearer key
+        client = DjYanbaoClient(args)   # args.dj_key 为 Bearer key
         items = client.list_reports(page=1, limit=20)
         detail = client.report_detail(123)
         content = client.report_content(123)
@@ -25,7 +25,7 @@ class DjYanbaoClient:
     """
 
     def __init__(self, args):
-        self.key = args.djkey
+        self.key = args.dj_key
         self.headers = {
             "Authorization": f"Bearer {self.key}",
             "client-ver": "v2.1.0",
