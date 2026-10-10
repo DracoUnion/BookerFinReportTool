@@ -46,7 +46,7 @@ def download(args, report_id=None):
     except Exception:
         detail = {}
     title = detail.get('title', '')
-    safe_title = re.sub(r'[^\\w\\u4e00-\\u9fff]', '', title) if title else ''
+    safe_title = re.sub(r'[\\/:*?"<>\\|]', '', title) if title else ''
     date_str = _publish_date_str(detail)
     base = f'【{date_str}】{safe_title}' if safe_title else f'【{date_str}】{rid}'
     fname = path.join(out_dir, base + '.pdf')
