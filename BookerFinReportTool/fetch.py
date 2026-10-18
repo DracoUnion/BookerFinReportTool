@@ -21,7 +21,7 @@ def fetch(args):
     f = open(args.fname, 'a', encoding='utf8')
     if args.source == 'favorite':
         ids = client.favorite_report_ids()
-        print(ids)
+        print(f'[+] {ids}')
     else:
         page = args.start_page
         while not args.end_page or page <= args.end_page:
