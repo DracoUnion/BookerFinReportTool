@@ -56,11 +56,8 @@ def download(args, report_id=None):
     institution = _safe_name(detail.get('orgName', '未知机构'))
 
     date_str = _publish_date_str(detail)
-    parts = [f'【{date_str}】']
-    if institution:
-        parts.append(f'【{institution}】')
-    parts.append(title if title else str(rid))
-    fname = path.join(out_dir, ''.join(parts) + '.pdf')
+    base = f'【{date_str}】【{institution}】{title}.pdf'
+    fname = path.join(out_dir, base)
 
     r = requests.get(file_url)
     r.raise_for_status()
