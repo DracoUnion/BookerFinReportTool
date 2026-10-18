@@ -54,7 +54,7 @@ def reg_subparser(subparsers):
     fetch_parser.add_argument(
         "-s", "--source",
         choices=['favorite', 'list'],
-        default='favorite',
+        default='list',
         help="抓取来源：收藏列表或研报列表",
     )
     fetch_parser.add_argument("-q", "--query", default='', help="研报搜索词（仅 source=list）")
