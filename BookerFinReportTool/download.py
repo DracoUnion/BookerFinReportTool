@@ -16,7 +16,7 @@ def _publish_date_str(detail) -> str:
     """从研报详情中提取发布日期，格式化为 `YYYY-MM-DD`；缺省返回空串。"""
     if not detail:
         return ''
-    d = detail.get('publishAt') or detail.get('publish_at') or detail.get('publishDate') or ''
+    d = detail.get('publishAt')
     if isinstance(d, str):
         m = re.match(r'\d{4}-\d{2}-\d{2}', d)
         return m.group(0) if m else d[:10]
@@ -52,15 +52,8 @@ def download(args, report_id=None):
     except Exception:
         detail = {}
 
-    title = _safe_name(detail.get('title', ''))
-    # 机构名：优先 detail.institution，其次 cards/organization 字段
-    institution = (
-        detail.get('institution')
-        or detail.get('organization')
-        or (detail.get('cards') or {}).get('institution', '')
-        or ''
-    )
-    institution = _safe_name(str(institution))
+    title = _safe_name(detail.get('title', '未知标题'))
+    institution = _safe_name(detail.get('orgName', '未知机构'))
 
     date_str = _publish_date_str(detail)
     parts = [f'【{date_str}】']
