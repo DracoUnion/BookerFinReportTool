@@ -17,7 +17,6 @@ def fetch(args):
         return
     client = DjYanbaoClient(args)
 
-    ids = []
     f = open(args.fname, 'a', encoding='utf8')
     if args.source == 'favorite':
         ids = client.favorite_report_ids()
@@ -35,7 +34,7 @@ def fetch(args):
             )
             if not items:
                 break
-            ids += [str(it.get('id')) for it in items if it.get('id')]
+            ids = [str(it.get('id')) for it in items if it.get('id')]
             print(f'[+] {ids}')
             f.writelines(ids)
             f.flush()
