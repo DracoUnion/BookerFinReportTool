@@ -21,6 +21,8 @@ def fetch(args):
     if args.source == 'favorite':
         ids = client.favorite_report_ids()
         print(f'[+] {ids}')
+        for id in ids:
+            f.write(id + '\n')
     else:
         page = args.start_page
         while not args.end_page or page <= args.end_page:
@@ -36,7 +38,8 @@ def fetch(args):
                 break
             ids = [str(it.get('id')) for it in items if it.get('id')]
             print(f'[+] {ids}')
-            f.writelines(ids)
+            for id in ids:
+                f.write(id + '\n')
             f.flush()
             page += 1
 
