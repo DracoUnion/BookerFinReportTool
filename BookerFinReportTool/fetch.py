@@ -25,6 +25,7 @@ def fetch(args):
     else:
         page = args.start_page
         while not args.end_page or page <= args.end_page:
+            print(f'[*] 抓取第 {page} 页')
             items = client.list_reports(
                 page=page,
                 limit=args.limit,
@@ -35,10 +36,12 @@ def fetch(args):
             if not items:
                 break
             ids += [str(it.get('id')) for it in items if it.get('id')]
-            print(ids)
+            print(f'[+] {ids}')
             f.writelines(ids)
+            f.flush()
             page += 1
 
+    f.close()
     logger.info(f'[*] 共 ??? 个研报 ID，已写入 {args.fname}')
 
 def reg_subparser(subparsers):
