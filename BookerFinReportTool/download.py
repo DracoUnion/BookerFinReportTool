@@ -27,7 +27,9 @@ def _publish_date_str(detail) -> str:
 
 def _safe_name(text: str) -> str:
     """过滤路径非法字符，保留中文标点。"""
-    return re.sub(r'[\\/:*?"<>\\|]', '', text) if text else ''
+    text = re.sub(r'[\\/:*?"<>\\|]', '', text) if text else ''
+    text = text.replace('\x20', '-')
+    return text
 
 def download(args, report_id=None):
     """下载单份研报 PDF，文件名格式 `【日期】【机构】标题.pdf`。"""
