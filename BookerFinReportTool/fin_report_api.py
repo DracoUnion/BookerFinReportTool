@@ -79,9 +79,17 @@ class DjYanbaoClient:
         data = self._req("GET", f"report/{report_id}/content")
         return (data or {}).get("content", "")
 
-    def report_download_info(self, report_id, action: str = "view") -> dict:
+    def report_download_info(
+        self, report_id, 
+        action: Literal["view", "download"] = "view",
+        format: Literal["pdf", "origin"] = "pdf",
+    ) -> dict:
         """研报下载信息，成功时返回 `data.fileUrl`（PDF 下载地址）。"""
-        return self._req("GET", f"report/{report_id}/download/info", params={"action": action})
+        return self._req(
+            "GET", 
+            f"report/{report_id}/download/info", 
+            params={"action": action, "format": format},
+        )
 
     def favorite_report_ids(self) -> List:
         """收藏研报 ID 列表。"""
