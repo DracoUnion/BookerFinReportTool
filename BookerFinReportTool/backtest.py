@@ -9,7 +9,7 @@ import json_repair
 from os import path
 from typing import List, Optional
 from .util import render_prompt, ext_code_block, json_dump_model, write_yaml_model
-from .openai import ask_chatgpt_retry
+from .openai import OpenAIClient
 from .models import (
     Report, Prediction, BacktestResult, ExtractedBundle,
 )
@@ -39,6 +39,7 @@ BACKTEST_NOTE_PMT = """\
 
 def backtest(args):
     store = FileStore(args.data_dir)
+    llm = OpenAIClient.from_args(args)
     as_of = args.to or args.as_of
     preds: List[Prediction] = []
     for rid in store.list_report_ids():
@@ -95,7 +96,7 @@ def backtest(args):
         stats=json_dump_model(result.model_dump()),
     )
     try:
-        ans = json_repair.loads(ext_code_block(ask_chatgpt_retry(
+        ans = json_repair.loads(ext_code_block(llm.ask_chatgpt_retry(
             ques, args.model, args,
             parse_output=lambda s: ext_code_block(s),
         )))

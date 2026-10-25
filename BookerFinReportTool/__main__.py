@@ -2,7 +2,6 @@ import os
 import argparse
 from . import __version__
 from .util import *
-from .openai import set_openai_props, call_llm_with_toolcall_retry
 from . import download, fetch, batch
 from . import ingest, extract, index, wiki, backtest, leaderboard
 from . import consensus, narrative, debate, catalyst, counterfactual
@@ -66,7 +65,6 @@ def main():
     factor.reg_subparser(subparsers)
 
     args = parser.parse_args()
-    set_openai_props(args)
     args.func(args)
 
 if __name__ == '__main__':

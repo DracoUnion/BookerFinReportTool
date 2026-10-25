@@ -9,7 +9,7 @@ import json_repair
 from os import path
 from typing import List
 from .util import render_prompt, ext_code_block, json_dump_model, write_yaml_model
-from .openai import ask_chatgpt_retry
+from .openai import OpenAIClient
 from .models import Prediction, LeaderboardEntry
 from .storage import FileStore
 
@@ -37,6 +37,7 @@ def _bayes_shrink(x: float, n: int, m: float = 0.5, k: float = 10) -> float:
 
 def leaderboard(args):
     store = FileStore(args.data_dir)
+    llm = OpenAIClient.from_args(args)
     by = args.by
     key_of = lambda p: (p.analyst if by == 'analyst' else p.institution)
     groups: dict = {}
@@ -73,7 +74,7 @@ def leaderboard(args):
             comment='',
         )
         try:
-            ans = json_repair.loads(ext_code_block(ask_chatgpt_retry(
+            ans = json_repair.loads(ext_code_block(llm.ask_chatgpt_retry(
                 render_prompt(LEADER_COMMENT_PMT, entry=json_dump_model(entry)),
                 args.model, args,
                 parse_output=lambda s: ext_code_block(s),

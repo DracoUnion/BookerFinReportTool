@@ -9,7 +9,7 @@ import json_repair
 from os import path
 from typing import List
 from .util import render_prompt, ext_code_block, json_dump_model, write_yaml_model
-from .openai import ask_chatgpt_retry
+from .openai import OpenAIClient
 from .models import FactorValue
 from .storage import FileStore
 
@@ -41,6 +41,7 @@ FACTOR_NAMES = [
 def factor_build(args):
     """构建指定因子的面板。"""
     store = FileStore(args.data_dir)
+    llm = OpenAIClient.from_args(args)
     panel: List[FactorValue] = []
     tickers = args.tickers.split(',') if args.tickers else _all_tickers(store)
     for t in tickers:
@@ -54,7 +55,7 @@ def factor_build(args):
             FACTOR_EXTRACT_PMT,
             ticker=t, factor=args.name, views=views_str,
         )
-        ans = json_repair.loads(ext_code_block(ask_chatgpt_retry(
+        ans = json_repair.loads(ext_code_block(llm.ask_chatgpt_retry(
             ques, args.model, args,
             parse_output=lambda s: ext_code_block(s),
         )))

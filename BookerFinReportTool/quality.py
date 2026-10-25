@@ -4,7 +4,7 @@ import logging
 import json_repair
 from os import path
 from .util import render_prompt, ext_code_block, json_dump_model, write_yaml_model, read_text
-from .openai import ask_chatgpt_retry
+from .openai import OpenAIClient
 from .models import QualityReport
 from .storage import FileStore
 
@@ -42,6 +42,7 @@ QUALITY_PMT = """\
 
 def quality(args):
     store = FileStore(args.data_dir)
+    llm = OpenAIClient.from_args(args)
     reps = store.all_reports()
     if args.institution:
         reps = [r for r in reps if args.institution in r.institution]
@@ -58,7 +59,7 @@ def quality(args):
             reports.append(QualityReport(report_id=rep.id))
             continue
         ques = render_prompt(QUALITY_PMT, text=text[:40_000])
-        ans = json_repair.loads(ext_code_block(ask_chatgpt_retry(
+        ans = json_repair.loads(ext_code_block(llm.ask_chatgpt_retry(
             ques, args.model, args,
             parse_output=lambda s: ext_code_block(s),
         )))

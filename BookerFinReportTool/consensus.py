@@ -5,7 +5,7 @@ import json_repair
 from os import path
 from typing import List, Dict
 from .util import render_prompt, ext_code_block, json_dump_model, write_yaml_model
-from .openai import ask_chatgpt_retry
+from .openai import OpenAIClient
 from .models import ConsensusMetric, View
 from .storage import FileStore
 
@@ -31,6 +31,7 @@ JSON 输出：{{"note":"..."}}。
 
 def consensus(args):
     store = FileStore(args.data_dir)
+    llm = OpenAIClient.from_args(args)
     views: List[View] = []
     for rid in store.list_report_ids():
         b = store.load_extracted(rid)
@@ -75,7 +76,7 @@ def consensus(args):
     # LLM 解释最强的一条
     if top:
         m = top[0]
-        ans = json_repair.loads(ext_code_block(ask_chatgpt_retry(
+        ans = json_repair.loads(ext_code_block(llm.ask_chatgpt_retry(
             render_prompt(
                 CONSENSUS_NOTE_PMT,
                 stats=json_dump_model(m.model_dump()),

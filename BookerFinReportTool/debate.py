@@ -5,7 +5,7 @@ import json_repair
 from os import path
 from typing import List
 from .util import render_prompt, ext_code_block, ext_cont_block, json_dump_model, write_yaml_model
-from .openai import ask_chatgpt_retry
+from .openai import OpenAIClient
 from .debate_pmt import (
     DEBATE_BULL_PMT, DEBATE_BEAR_PMT, DEBATE_REBUT_PMT, DEBATE_JUDGE_PMT,
 )
@@ -37,6 +37,7 @@ def _retrieved_str(store: FileStore, ticker: str) -> str:
 
 def debate(args):
     store = FileStore(args.data_dir)
+    llm = OpenAIClient.from_args(args)
     retrieved = _retrieved_str(store, args.ticker)
     turns: List[DebateTurn] = []
 
@@ -48,7 +49,7 @@ def debate(args):
 
     for rnd in range(1, rounds + 1):
         # bull
-        bull_txt = ask_chatgpt_retry(
+        bull_txt = llm.ask_chatgpt_retry(
             render_prompt(
                 DEBATE_BULL_PMT if rnd == 1 else DEBATE_REBUT_PMT,
                 ticker=args.ticker,
@@ -64,7 +65,7 @@ def debate(args):
         turns.append(DebateTurn(role='bull', text=bull_txt))
 
         # bear
-        bear_txt = ask_chatgpt_retry(
+        bear_txt = llm.ask_chatgpt_retry(
             render_prompt(
                 DEBATE_BEAR_PMT if rnd == 1 else DEBATE_REBUT_PMT,
                 ticker=args.ticker,
@@ -80,7 +81,7 @@ def debate(args):
         turns.append(DebateTurn(role='bear', text=bear_txt))
 
     # judge
-    judge_ans = json_repair.loads(ext_code_block(ask_chatgpt_retry(
+    judge_ans = json_repair.loads(ext_code_block(llm.ask_chatgpt_retry(
         render_prompt(
             DEBATE_JUDGE_PMT,
             bull='\n\n'.join(bull_hist),

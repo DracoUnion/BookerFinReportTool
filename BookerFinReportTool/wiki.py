@@ -11,7 +11,7 @@ from .util import (
     read_yaml_model, write_yaml_model, read_text,
     render_prompt, ext_cont_block, json_dump_model,
 )
-from .openai import ask_chatgpt_retry
+from .openai import OpenAIClient
 from .models import WqiAnswer, EvidenceRef, Report
 from .storage import FileStore
 
@@ -80,6 +80,7 @@ def _retrieval(store: FileStore, question: str, top_k: int = 5) -> List[dict]:
 def wiki(args):
     """`args.question` 作为自然语言问题。"""
     store = FileStore(args.data_dir)
+    llm = OpenAIClient.from_args(args)
     retrieved = _retrieval(store, args.question, args.top_k)
     if not retrieved:
         logger.warning('检索结果为空，可先运行 `index` 或 `extract`')
@@ -96,7 +97,7 @@ def wiki(args):
 
     ques = render_prompt(WQI_PMT, retrieved=retrieved_str, question=args.question)
     parse_output = lambda s: json_repair.loads(ext_cont_block(s))
-    ans: dict = ask_chatgpt_retry(
+    ans: dict = llm.ask_chatgpt_retry(
         ques, args.model, args,
         parse_output=parse_output,
     )

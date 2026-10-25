@@ -9,7 +9,7 @@ import json_repair
 from os import path
 from collections import defaultdict
 from .util import render_prompt, ext_code_block, ext_cont_block, json_dump_model, write_yaml_model
-from .openai import ask_chatgpt_retry
+from .openai import OpenAIClient
 from .models import NarrativeResult, NarrativeNode, NarrativeEdge
 from .storage import FileStore
 
@@ -32,6 +32,7 @@ NARRATIVE_SUM_PMT = """\
 
 def narrative(args):
     store = FileStore(args.data_dir)
+    llm = OpenAIClient.from_args(args)
 
     # 1. 按主题（观点 subject 前 8 字）分组
     theme_map: dict = defaultdict(list)
@@ -71,7 +72,7 @@ def narrative(args):
     timeline.sort()
     summary = ''
     if timeline:
-        summary = ask_chatgpt_retry(
+        summary = llm.ask_chatgpt_retry(
             render_prompt(
                 NARRATIVE_SUM_PMT,
                 theme=args.theme or '多主题',

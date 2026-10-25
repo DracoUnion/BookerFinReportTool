@@ -9,7 +9,7 @@ from .util import (
     read_yaml_model, write_yaml_model, read_text,
     render_prompt, ext_code_block,
 )
-from .openai import ask_chatgpt_retry
+from .openai import OpenAIClient
 from .extract_pmt import EXTRACT_BUNDLE_PMT
 from .extract_models import (
     ExtractBundleLLMOut,
@@ -36,6 +36,7 @@ def extract_one(
     args, store: FileStore, rid: str,
 ) -> Optional[ExtractedBundle]:
     """对单份研报做抽取，结果幂等写回 `extracted/{rid}.yaml`。"""
+    llm = OpenAIClient.from_args(args)
     cached = store.load_extracted(rid)
     if cached:
         return cached
@@ -52,7 +53,7 @@ def extract_one(
     parse_output = lambda s: ExtractBundleLLMOut.model_validate(
         json_repair.loads(ext_code_block(s))
     )
-    out: ExtractBundleLLMOut = ask_chatgpt_retry(
+    out: ExtractBundleLLMOut = llm.ask_chatgpt_retry(
         ques, args.model, args,
         parse_output=parse_output,
     )

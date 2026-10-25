@@ -4,7 +4,7 @@ import logging
 import json_repair
 from os import path
 from .util import render_prompt, ext_code_block, json_dump_model, write_yaml_model
-from .openai import ask_chatgpt_retry
+from .openai import OpenAIClient
 from .storage import FileStore
 
 logging.basicConfig(
@@ -38,6 +38,7 @@ COUNTERFCTUAL_PMT = """\
 
 def counterfactual(args):
     store = FileStore(args.data_dir)
+    llm = OpenAIClient.from_args(args)
     # 检索 period 内的研报
     parts = []
     for rid in store.list_report_ids():
@@ -54,7 +55,7 @@ def counterfactual(args):
         condition=args.condition,
         retrieved=retrieved,
     )
-    ans = json_repair.loads(ext_code_block(ask_chatgpt_retry(
+    ans = json_repair.loads(ext_code_block(llm.ask_chatgpt_retry(
         ques, args.model, args,
         parse_output=lambda s: ext_code_block(s),
     )))
