@@ -1,5 +1,6 @@
 import os
 import argparse
+import sys
 from . import __version__
 from .util import *
 from . import download, fetch, batch
@@ -8,6 +9,9 @@ from . import consensus, narrative, debate, catalyst, counterfactual
 from . import quality, factor, config, doctor
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
     openai_key = os.environ.get('OPENAI_API_KEY')
     openai_url = os.environ.get('OPENAI_BASE_URL')
     openai_model = os.environ.get('OPENAI_CHAT_MODEL', 'gpt-3.5-turbo')
