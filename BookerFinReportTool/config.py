@@ -14,7 +14,7 @@ def config_show(args):
     print(json_dump_model({
         'model': args.model,
         'host': args.host,
-        'stream': args.stream,
+        'stream': not args.no_stream,
         'data_dir': getattr(args, 'data_dir', './data'),
         'retry': args.retry,
     }))
